@@ -1,0 +1,13 @@
+{
+  "TenantId": "00000000-0000-0000-0000-000000000000",
+  "ClientId": "00000000-0000-0000-0000-000000000000",
+  "ClientSecret": "PASTE-CLIENT-SECRET-HERE",
+  "SecretEncrypted": false,
+  "LogPath": "C:\\Group-Mirror\\Logs",
+  "LogFile": "GroupMirror_Log.html",
+  "SearchDomains": [
+    "corp.contoso.local",
+    "east.corp.contoso.local",
+    "west.corp.contoso.local"
+  ]
+}

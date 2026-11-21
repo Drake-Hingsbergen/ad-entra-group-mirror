@@ -1,0 +1,10 @@
+# Real settings and secrets stay local
+config.json
+
+# Runtime output
+Logs/
+*.html
+
+# Build outputs
+*.exe
+*.ico
