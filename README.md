@@ -38,6 +38,89 @@ Typical use: a new hire or role change needs "the same access as a colleague."
 
 The lists in this repo are samples. Replace them with your own group names.
 
+## Examples
+
+All examples below were produced by the tool's own functions, run against placeholder users and groups with Active Directory and Graph faked.
+
+### How a run flows
+
+```mermaid
+flowchart TD
+    A["Enter source and target users"] --> B["Gather, read only: AD groups from every configured domain, Graph groups if cloud copy is on"]
+    B --> R{"On the restricted list?"}
+    R -- yes --> X1["Excluded: BLOCK"]
+    R -- no --> L{"Cloud: on the licensing list?"}
+    L -- yes --> X2["Excluded: LIC"]
+    L -- no --> D{"Cloud: dynamic group?"}
+    D -- yes --> X3["Excluded: DYN"]
+    D -- no --> S{"Cloud: synced from AD?"}
+    S -- yes --> X4["Excluded: SYNC"]
+    S -- no --> M{"Target already a member?"}
+    M -- yes --> X5["Excluded: MBR"]
+    M -- no --> C["Checkable in the confirmation window"]
+    C --> W{"Admin confirms?"}
+    W -- cancel --> N["Nothing changes"]
+    W -- confirm --> E["Add only the checked groups"]
+    E --> P["Results window, ticket summary, HTML log"]
+```
+
+### Ticket summary
+
+What **Copy to Clipboard** produces for that run:
+
+```
+Group Mirror - 2026-01-15 09:30:00
+Source (copying FROM): source.user
+Target (copying TO):   target.user
+
+-- OnPrem --------------------------
+
+[OK]   Added Successfully (3)
+   * App - Reporting Users [corp.contoso.local]
+   * Share - Finance Read [east.corp.contoso.local]
+   * VPN - Standard Users [corp.contoso.local]
+
+[MBR]  Already a Member (1)
+   * All Staff [corp.contoso.local]
+
+[BLOCK] Blocked - Restricted Group (1)
+   * Restricted - Sample Group A_0a1b2c3d4e5f [corp.contoso.local]
+
+[FAIL] Failed (1)
+   * Print - Plotter Users [west.corp.contoso.local]
+     --> Insufficient access rights to perform the operation
+
+Summary: [OK]   3  [DYN]  0  [SYNC] 0  [MBR]  1  [LIC] 0  [BLOCK] 1  [FAIL] 1  [???]  0
+
+-- Cloud --------------------------
+
+[OK]   Added Successfully (2)
+   * Project Alpha Team
+   * Sales Dashboard Viewers
+
+[DYN]  Dynamic (Auto-Assign) (1)
+   * All Staff Dynamic
+     --> Dynamic group - membership auto-assigned when account meets rule criteria. Verify in Entra after provisioning completes.
+
+[SYNC] Already Synced On-Prem (1)
+   * VPN - Standard Users
+     --> Group is mastered in on-prem AD and synced to Entra. Already handled by on-prem copy - no cloud action needed.
+
+[MBR]  Already a Member (1)
+   * Company Announcements
+
+[LIC]  Licensing Group - Skipped (1)
+   * Licensing - Sample Product A
+
+Summary: [OK]   2  [DYN]  1  [SYNC] 1  [MBR]  1  [LIC] 1  [BLOCK] 0  [FAIL] 0  [???]  0
+```
+
+### HTML log
+
+Each run is added to the top of one HTML file:
+
+![Sample HTML log entry](docs/images/sample-log.png)
+
 ## How it is built
 
 - **Windows PowerShell 5.1** and **WinForms**, targeting Windows Server 2016 with no extra modules beyond RSAT ActiveDirectory.
@@ -55,6 +138,7 @@ The lists in this repo are samples. Replace them with your own group names.
 | `tests/Group-Mirror.Tests.ps1` | Pester 4 tests with Active Directory and Graph mocked |
 | `PSScriptAnalyzerSettings.psd1` | Analyzer rules for PowerShell 5.1 on Server 2016 |
 | `docs/BUILD-NOTES.md` | Problems found during the build and why each fix worked |
+| `docs/images/sample-log.png` | Sample HTML log from a placeholder run |
 
 ## Deploy
 
